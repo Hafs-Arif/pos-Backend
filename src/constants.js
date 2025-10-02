@@ -1,0 +1,1 @@
+export const DB_NAME = "crazy_hot_dealz";
