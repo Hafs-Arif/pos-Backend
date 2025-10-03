@@ -17,7 +17,16 @@ app.use(errorHandler)
 
 //Routes Imports
 import productRouter from "./routes/product.routes.js"
+import categoryRoutes from "./routes/category.routes.js";
+import brandRoutes from "./routes/brand.routes.js";
 
+// API Routes
 app.use("/api/products", productRouter);
+app.use("/api/categories", categoryRoutes);
+app.use("/api/brands", brandRoutes);
+
+app.get('/api/health', (req, res) => {
+    console.log("Backend is Running!!");
+});
 
 export { app }
