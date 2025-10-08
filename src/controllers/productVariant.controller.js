@@ -2,7 +2,7 @@
 import pool from "../db/index.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
-
+ 
 // Get all product variants
 export const getProductVariants = asyncHandler(async (req, res, next) => {
   const result = await pool.query("SELECT * FROM product_variants ORDER BY variant_id ASC");

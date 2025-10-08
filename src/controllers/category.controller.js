@@ -4,7 +4,7 @@ import { ApiResponse } from "../utils/ApiResponse.js";
 // validate user authentication and authorization here as needed
 
 // Get all categories
-export const getCategories = async  (req, res, next) => {
+export const getCategories = async (req, res, next) => {
   try {
     const result = await pool.query("SELECT * FROM categories ORDER BY display_order, name");
     res
@@ -32,35 +32,44 @@ export const getCategoryById = async (req, res, next) => {
 // Create category
 export const createCategory = async (req, res, next) => {
   try {
-    const { name, parent_id, description, display_order } = req.body;
+    const { name, parent_id, description, display_order, icon_url } = req.body;
+    
     const result = await pool.query(
-      `INSERT INTO categories (name, parent_id, description, display_order, product_count)
-       VALUES ($1, $2, $3, $4, $5) RETURNING *`,
-      [name, parent_id || null, description || null, display_order || 0, 0]
+      `INSERT INTO categories (name, parent_id, description, display_order, product_count, icon_url)
+       VALUES ($1, $2, $3, $4, $5, $6) RETURNING *`,
+      [name, parent_id || null, description || null, display_order || 0, 0, icon_url || null]
     );
-    res.status(200).json(new ApiResponse(200, result.rows[0], "Category created successfully"));
+    
+    res.status(201).json(new ApiResponse(201, result.rows[0], "Category created successfully"));
   } catch (err) {
     next(err);
   }
 };
-
-// Update category
+ 
+// Update category - SQL query fix karo
 export const updateCategory = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const { name, description, display_order, is_visible_online } = req.body;
+    const { name, description, display_order, is_visible_online, icon_url } = req.body;
+    
     const result = await pool.query(
       `UPDATE categories 
-       SET name=$1, product_count=$2, description=$3, display_order=$4, is_visible_online=$5, updated_at=NOW()
+       SET name=$1, description=$2, display_order=$3, is_visible_online=$4, 
+           icon_url=$5, updated_at=NOW()
        WHERE category_id=$6 RETURNING *`,
-      [name, description, display_order, is_visible_online, id]
+      [name, description, display_order || 0, is_visible_online || true, icon_url, id]
     );
-    if (result.rows.length === 0) return res.status(404).json({ message: "Category not found" });
+    
+    if (result.rows.length === 0) {
+      return res.status(404).json(new ApiResponse(404, null, "Category not found!"));
+    }
+    
     res.status(200).json(new ApiResponse(200, result.rows[0], "Category updated successfully"));
   } catch (err) {
     next(err);
   }
 };
+
 
 // Delete category
 export const deleteCategory = async (req, res, next) => {

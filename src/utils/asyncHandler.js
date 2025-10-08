@@ -51,10 +51,12 @@ const asyncHandler = (fn) => async (req, res, next) => {
 
 export {asyncHandler};
 
-/** Promise technique
- * const asyncHandler = (reqHandler) => {
- *  (req, res, next) => {
- *      return (resolve(reqHandler).reject(err) = > next(err))
- *  }
- * }
+/** Promise technique implementation
+ * Alternative implementation using Promises:
+ * const asyncHandler = (requestHandler) => {
+ *     return (req, res, next) => {
+ *         Promise.resolve(requestHandler(req, res, next))
+ *             .catch((err) => next(err));
+ *     };
+ * };
  */

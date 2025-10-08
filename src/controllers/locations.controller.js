@@ -16,12 +16,35 @@ export const getLocationById = asyncHandler(async (req, res, next) => {
 });
 // Create location
 export const createLocation = asyncHandler(async (req, res, next) => {
-  const { name, address, location_type, city, state, zip_code, country, phone_number, email } = req.body;
+  const { 
+    name, 
+    address, 
+    location, 
+    phone, 
+    status, 
+    contact_person, 
+    capacity 
+  } = req.body;
+
+  // Validate required fields
+  if (!name || !location || !status) {
+    return res.status(400).json(
+      new ApiResponse(400, null, "Name, location, and activity status are required")
+    );
+  }
 
   const result = await pool.query(
-    `INSERT INTO locations (name, address, location_type, city, state, zip_code, country, phone_number, email)
-    VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *`,
-    [name, address, location_type, city, state, zip_code, country, phone_number, email]
+    `INSERT INTO locations (
+      name, 
+      address, 
+      location, 
+      phone, 
+      status, 
+      contact_person, 
+      capacity
+    )
+    VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *`,
+    [name, address, location, phone, status, contact_person, capacity]
   );
 
   res.status(201).json(new ApiResponse(201, result.rows[0], "Location Created Successfully"));
@@ -29,21 +52,27 @@ export const createLocation = asyncHandler(async (req, res, next) => {
 // Update location
 export const updateLocation = asyncHandler(async (req, res, next) => {
   const { id } = req.params;
-  const { name, address, location_type, city, state, zip_code, country, phone_number, email } = req.body;
+  const { 
+    name, 
+    address, 
+    location,  
+    phone, 
+    status, 
+    contact_person, 
+    capacity 
+  } = req.body;
 
   const result = await pool.query(
     `UPDATE locations SET
       name = $1,
       address = $2,
-      location_type = $3,
-      city = $4,
-      state = $5,
-      zip_code = $6,
-      country = $7,
-      phone_number = $8,
-      email = $9
-    WHERE location_id = $10 RETURNING *`,
-    [name, address, location_type, city, state, zip_code, country, phone_number, email, id]
+      location = $3,
+      phone = $4,
+      status = $5,
+      contact_person = $6, 
+      capacity = $7
+    WHERE location_id = $8 RETURNING *`,
+    [name, address, location, phone, status, contact_person, capacity, id]
   );
 
   if (result.rows.length === 0) {

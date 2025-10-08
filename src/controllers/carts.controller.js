@@ -6,7 +6,7 @@ export const getCarts = async (req, res, next) => {
     const result = await pool.query("SELECT * FROM carts ORDER BY cart_id ASC");
     res.json(result.rows);
   } catch (err) {
-    next(err);
+    next(err); 
   }
 };
 
@@ -28,8 +28,34 @@ export const getCartById = async (req, res, next) => {
 export const getCartsByUser = async (req, res, next) => {
   const { userId } = req.params;
   try {
-    const result = await pool.query("SELECT * FROM carts WHERE user_id = $1 ORDER BY added_at DESC", [userId]);
-    res.json(result.rows);
+    // Join products to return useful product info for the frontend (name, price, image)
+    const result = await pool.query(
+      `SELECT c.*, p.name AS product_name, p.retail_price AS product_price, p.image_url AS product_image
+       FROM carts c
+       LEFT JOIN products p ON p.product_id = c.product_id
+       WHERE c.user_id = $1
+       ORDER BY c.added_at DESC`,
+      [userId]
+    );
+
+    // Map rows to a friendly shape
+    const rows = result.rows.map((r) => ({
+      cart_id: r.cart_id,
+      user_id: r.user_id,
+      session_id: r.session_id,
+      product_id: r.product_id,
+      variant_id: r.variant_id,
+      quantity: r.quantity,
+      expires_at: r.expires_at,
+      is_one_click_eligible: r.is_one_click_eligible,
+      added_at: r.added_at,
+      updated_at: r.updated_at,
+      product_name: r.product_name,
+      product_price: r.product_price,
+      product_image: r.product_image,
+    }));
+
+    res.json(rows);
   } catch (err) {
     next(err);
   }
@@ -45,7 +71,7 @@ export const addToCart = async (req, res, next) => {
        WHERE (user_id = $1 OR session_id = $2)
        AND product_id = $3
        AND (variant_id = $4 OR variant_id IS NULL)`,
-      [user_id, session_id, product_id, variant_id]
+      [user_id, session_id, product_id, variant_id] 
     );
 
     if (existing.rows.length > 0) {

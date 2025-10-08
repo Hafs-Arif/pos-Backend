@@ -1,5 +1,6 @@
 import pool from "../db/index.js";
 import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
 import { ApiResponse } from "../utils/ApiResponse.js";
 
 // Get all users
@@ -10,7 +11,7 @@ export const getUsers = async (req, res, next) => {
   } catch (err) {
     next(err);
   }
-};
+};  
 
 // Get user by ID
 export const getUserById = async (req, res, next) => {
@@ -172,8 +173,65 @@ export const changeUserPassword = async (req, res, next) => {
     res.json({ message: "Password changed successfully." });
   } catch (err) {
     next(err);
+  } 
+};
+// Login user - Simple version
+export const loginUser = async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    if (!email || !password) {
+      return res.status(400).json({
+        success: false,
+        message: "Email and password are required"
+      });
+    }
+
+    // Get user with matching email first
+    const userResult = await pool.query(
+      "SELECT * FROM users WHERE email = $1",
+      [email]
+    );
+    
+    if (userResult.rows.length === 0) {
+      return res.status(401).json({
+        success: false,
+        message: "Invalid credentials"
+      });
+    }
+
+    const user = userResult.rows[0];
+
+    // For testing, just compare passwords directly
+    if (!await bcrypt.compare(password, user.password_hash)) {
+      return res.status(401).json({
+        success: false,
+        message: "Invalid credentials"
+      });
+    }
+
+    // Return only necessary user data
+    const userData = {
+      user_id: user.user_id,
+      email: user.email,
+      role: user.role
+    };
+
+    // Send successful response
+    return res.status(200).json({
+      success: true,
+      data: {
+        user: userData
+      },
+      message: "Login successful"
+    });
+    
+  } catch (err) {
+    console.error('Login error:', err);
+    res.status(500).json(new ApiResponse(500, null, "Login failed"));
   }
 };
+
 // referesh token
 export const refreshToken = async (req, res, next) => {
   try {

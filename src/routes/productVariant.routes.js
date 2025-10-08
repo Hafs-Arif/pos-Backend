@@ -11,7 +11,7 @@ import {
 const router = express.Router();
 
 router.get("/", getProductVariants);
-router.get("/:id", getProductVariantById);
+router.get("/:id", getProductVariantById); 
 router.post("/", createProductVariant);
 router.put("/:id", updateProductVariant);
 router.delete("/:id", deleteProductVariant);

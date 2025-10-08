@@ -5,7 +5,7 @@ import {
   createBrand,
   updateBrand,
   deleteBrand
-} from "../controllers/brand.controller.js";
+} from "../controllers/brand.controller.js"; 
 
 const router = express.Router();
 
