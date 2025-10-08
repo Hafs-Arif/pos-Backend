@@ -22,6 +22,7 @@
     "jsonwebtoken": "^9.0.2",
     "mongoose-aggregate-paginate-v2": "^1.1.4",
     "multer": "^2.0.2",
+    "path": "^0.12.7",
     "pg": "^8.16.3"
   }
 }

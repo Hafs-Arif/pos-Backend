@@ -2,8 +2,17 @@ import { Pool } from "pg";
 // import { DB_NAME } from "../constants.js";
 
 
-const pool = new  Pool({
+if (!process.env.DB_URL) {
+  console.error('Database URL not found in environment variables');
+  process.exit(1);
+}
+
+const pool = new Pool({
   connectionString: process.env.DB_URL,
+  // Add some reasonable defaults
+  max: 20, // Maximum number of clients in the pool
+  idleTimeoutMillis: 30000, // Close idle clients after 30 seconds
+  connectionTimeoutMillis: 2000, // Return an error after 2 seconds if connection could not be established
 });
 
 export default pool;

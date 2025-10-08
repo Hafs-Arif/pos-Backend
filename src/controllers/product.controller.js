@@ -1,10 +1,11 @@
 import pool from "../db/index.js";
+import { ApiResponse } from "../utils/ApiResponse.js";
 
 // Get all products
 export const getProducts = async (req, res, next) => {
   try {
     const result = await pool.query("SELECT * FROM products ORDER BY created_at DESC");
-    res.json(result.rows);
+    res.status(200).json(new ApiResponse(200, result.rows, "Products fetched successfully"));
   } catch (err) {
     next(err);
   }
@@ -15,8 +16,8 @@ export const getProductById = async (req, res, next) => {
   try {
     const { id } = req.params;
     const result = await pool.query("SELECT * FROM products WHERE product_id = $1", [id]);
-    if (result.rows.length === 0) return res.status(404).json({ message: "Product not found" });
-    res.json(result.rows[0]);
+    if (result.rows.length === 0) return res.status(400).json(new ApiResponse(400, null,"Product not found" ));
+    res.status(200).json(new ApiResponse(200, result.rows[0], "Product fetched by id"));
   } catch (err) {
     next(err);
   }
@@ -31,7 +32,7 @@ export const createProduct = async (req, res, next) => {
        VALUES ($1,$2,$3,$4,$5,$6,$7) RETURNING *`,
       [name, category_id, brand_id, sku, condition, retail_price, cost_price]
     );
-    res.status(201).json(result.rows[0]);
+    res.status(200).json(new ApiResponse(200, result.rows[0], "Product created successfully"));
   } catch (err) {
     next(err);
   }
@@ -47,8 +48,8 @@ export const updateProduct = async (req, res, next) => {
        WHERE product_id=$5 RETURNING *`,
       [name, retail_price, cost_price, status, id]
     );
-    if (result.rows.length === 0) return res.status(404).json({ message: "Product not found" });
-    res.json(result.rows[0]);
+    if (result.rows.length === 0) return res.status(400).json(new ApiResponse(400, null,"Product not found" ));
+    res.status(200).json(new ApiResponse(200 ,result.rows[0], "Product updated successfully"));
   } catch (err) {
     next(err);
   }
@@ -59,7 +60,7 @@ export const deleteProduct = async (req, res, next) => {
   try {
     const { id } = req.params;
     await pool.query("DELETE FROM products WHERE product_id=$1", [id]);
-    res.json({ message: "Product deleted" });
+    res.status(200).json(new ApiResponse(200, null,"Product deleted" ));
   } catch (err) {
     next(err);
   }

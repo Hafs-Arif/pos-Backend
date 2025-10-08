@@ -1,10 +1,11 @@
 import pool from "../db/index.js";
+import { ApiResponse } from "../utils/ApiResponse.js";
 
 // Get all brands
 export const getBrands = async (req, res, next) => {
   try {
     const result = await pool.query("SELECT * FROM brands ORDER BY name");
-    res.json(result.rows);
+    res.status(200).json(new ApiResponse(200, result.rows, "Brands fetched succesfully"));
   } catch (err) {
     next(err);
   }
@@ -15,8 +16,8 @@ export const getBrandById = async (req, res, next) => {
   try {
     const { id } = req.params;
     const result = await pool.query("SELECT * FROM brands WHERE brand_id = $1", [id]);
-    if (result.rows.length === 0) return res.status(404).json({ message: "Brand not found" });
-    res.json(result.rows[0]);
+    if (result.rows.length === 0) return res.status(400).json(new ApiResponse(400, null, "Brand not found!"));
+    res.status(200).json(new ApiResponse(200, result.rows[0], "Brand successfully fetched by id"));
   } catch (err) {
     next(err);
   }
@@ -31,7 +32,7 @@ export const createBrand = async (req, res, next) => {
        VALUES ($1, $2, $3, $4) RETURNING *`,
       [name, description, logo_url, website_url]
     );
-    res.status(201).json(result.rows[0]);
+    res.status(200).json(new ApiResponse(200, result.rows[0], "Brand created successfully"));
   } catch (err) {
     next(err);
   }
@@ -48,8 +49,8 @@ export const updateBrand = async (req, res, next) => {
        WHERE brand_id=$6 RETURNING *`,
       [name, description, logo_url, website_url, is_visible_online, id]
     );
-    if (result.rows.length === 0) return res.status(404).json({ message: "Brand not found" });
-    res.json(result.rows[0]);
+    if (result.rows.length === 0) return res.status(400).json(new ApiResponse(400, null, "Brand not found!"));
+    res.status(200).json(new ApiResponse(200, result.rows[0], "Brand Updated"));
   } catch (err) {
     next(err);
   }
@@ -60,7 +61,7 @@ export const deleteBrand = async (req, res, next) => {
   try {
     const { id } = req.params;
     await pool.query("DELETE FROM brands WHERE brand_id=$1", [id]);
-    res.json({ message: "Brand deleted" });
+    res.status(200).json(200, null, "Brand deleted" );
   } catch (err) {
     next(err);
   }
