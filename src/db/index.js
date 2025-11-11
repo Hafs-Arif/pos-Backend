@@ -1,3 +1,5 @@
+import dotenv from "dotenv";
+dontenv.config();
 import { Pool } from "pg";
 // import { DB_NAME } from "../constants.js";
 
